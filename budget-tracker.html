@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Budget Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f4f6f9;
+      --surface:   #ffffff;
+      --border:    #e2e8f0;
+      --ink:       #0f172a;
+      --muted:     #94a3b8;
+      --green:     #16a34a;
+      --green-bg:  #dcfce7;
+      --red:       #dc2626;
+      --red-bg:    #fee2e2;
+      --blue:      #2563eb;
+      --blue-bg:   #dbeafe;
+      --yellow:    #d97706;
+      --yellow-bg: #fef3c7;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 2rem 1rem 5rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ── HEADER ── */
+    header {
+      margin-bottom: 2rem;
+    }
+    header .eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: .4rem;
+    }
+    header h1 {
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: -.03em;
+      color: var(--ink);
+    }
+    header p { color: var(--muted); font-size: .88rem; margin-top: .3rem; }
+
+    /* ── BALANCE CARDS ── */
+    .balance-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.8rem;
+    }
+    .bal-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 1.3rem 1.4rem;
+    }
+    .bal-card .bal-label {
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .5rem;
+    }
+    .bal-card .bal-val {
+      font-family: 'DM Mono', monospace;
+      font-size: clamp(1.4rem, 3.5vw, 2rem);
+      font-weight: 500;
+      letter-spacing: -.02em;
+    }
+    .bal-card.total  .bal-val { color: var(--ink); }
+    .bal-card.income .bal-val { color: var(--green); }
+    .bal-card.expense .bal-val { color: var(--red); }
+    .bal-card .bal-sub {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: .3rem;
+    }
+
+    /* ── LAYOUT ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 1.2rem;
+      align-items: start;
+    }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+    .form-card h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      color: var(--ink);
+    }
+
+    .field { margin-bottom: 1rem; }
+    .field label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: .35rem;
+    }
+    .field input {
+      width: 100%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: .65rem .9rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color .18s;
+    }
+    .field input:focus { border-color: var(--blue); background: #fff; }
+    .field input::placeholder { color: var(--muted); }
+
+    /* Toggle */
+    .toggle-wrap {
+      display: flex;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: .25rem;
+      gap: .2rem;
+      margin-bottom: 1.2rem;
+    }
+    .toggle-btn {
+      flex: 1;
+      border: none;
+      border-radius: 8px;
+      padding: .6rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .18s, color .18s;
+      background: transparent;
+      color: var(--muted);
+    }
+    .toggle-btn.income.active  { background: var(--green-bg); color: var(--green); }
+    .toggle-btn.expense.active { background: var(--red-bg);   color: var(--red); }
+
+    .btn-add {
+      width: 100%;
+      background: var(--ink);
+      border: none;
+      border-radius: 10px;
+      padding: .75rem;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: .95rem;
+      cursor: pointer;
+      transition: opacity .18s, transform .12s;
+    }
+    .btn-add:hover { opacity: .85; transform: translateY(-1px); }
+    .btn-add:active { transform: translateY(0); }
+
+    /* ── ENTRIES LIST ── */
+    .list-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 1.4rem 1rem;
+      border-bottom: 1.5px solid var(--border);
+    }
+    .list-header h2 { font-size: 1rem; font-weight: 700; }
+    .clear-btn {
+      font-size: .78rem;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      padding: .2rem .5rem;
+      border-radius: 6px;
+      transition: color .15s, background .15s;
+    }
+    .clear-btn:hover { color: var(--red); background: var(--red-bg); }
+
+    .entries-list { max-height: 420px; overflow-y: auto; }
+    .entries-list::-webkit-scrollbar { width: 4px; }
+    .entries-list::-webkit-scrollbar-track { background: transparent; }
+    .entries-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+    }
+    .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: .6rem; }
+    .empty-state p { font-size: .88rem; }
+
+    .entry-item {
+      display: flex;
+      align-items: center;
+      gap: .9rem;
+      padding: .9rem 1.4rem;
+      border-bottom: 1px solid var(--border);
+      animation: slideIn .25s ease both;
+      transition: background .15s;
+    }
+    .entry-item:last-child { border-bottom: none; }
+    .entry-item:hover { background: var(--bg); }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .entry-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .entry-icon.income  { background: var(--green-bg); }
+    .entry-icon.expense { background: var(--red-bg); }
+
+    .entry-info { flex: 1; min-width: 0; }
+    .entry-name {
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .entry-date {
+      font-size: .72rem;
+      color: var(--muted);
+      margin-top: .1rem;
+    }
+
+    .entry-amount {
+      font-family: 'DM Mono', monospace;
+      font-size: .95rem;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .entry-amount.income  { color: var(--green); }
+    .entry-amount.expense { color: var(--red); }
+
+    .entry-del {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: .25rem;
+      border-radius: 6px;
+      font-size: .85rem;
+      line-height: 1;
+      transition: color .15s, background .15s;
+      flex-shrink: 0;
+    }
+    .entry-del:hover { color: var(--red); background: var(--red-bg); }
+
+    /* ── CHART ── */
+    .chart-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 1.3rem 1.4rem;
+      margin-top: 1.2rem;
+    }
+    .chart-card h2 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+    .chart-bar-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: .7rem;
+    }
+    .chart-row { display: flex; align-items: center; gap: .8rem; }
+    .chart-lbl {
+      width: 70px;
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      flex-shrink: 0;
+    }
+    .chart-track {
+      flex: 1;
+      height: 10px;
+      background: var(--bg);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .chart-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width .5s ease;
+    }
+    .chart-fill.income  { background: var(--green); }
+    .chart-fill.expense { background: var(--red); }
+    .chart-num {
+      font-family: 'DM Mono', monospace;
+      font-size: .78rem;
+      width: 72px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .chart-num.income  { color: var(--green); }
+    .chart-num.expense { color: var(--red); }
+
+    /* ── VALIDATION ── */
+    .field-error {
+      font-size: .75rem;
+      color: var(--red);
+      margin-top: .3rem;
+      display: none;
+    }
+
+    @media (max-width: 640px) {
+      .balance-grid  { grid-template-columns: 1fr; gap: .7rem; }
+      .main-grid     { grid-template-columns: 1fr; }
+      .bal-card .bal-val { font-size: 1.4rem; }
+    }
+
+    /* ── THEME TOGGLE BUTTON ── */
+    .theme-toggle {
+      position: fixed;
+      top: 14px;
+      right: 16px;
+      z-index: 999;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      padding: .38rem .85rem;
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      transition: background .2s, border-color .2s, color .2s;
+      font-family: inherit;
+    }
+    .theme-toggle:hover { border-color: var(--accent); }
+
+    /* ── DARK THEME OVERRIDES ── */
+    [data-theme="dark"] {
+      --bg:        #0f172a;
+      --surface:   #1e293b;
+      --card:      #1e293b;
+      --border:    #334155;
+      --ink:       #f1f5f9;
+      --muted:     #64748b;
+      --green-bg:  #14532d;
+      --red-bg:    #450a0a;
+      --yellow-bg: #451a03;
+      --blue-bg:   #1e3a5f;
+    }
+    [data-theme="dark"] .theme-toggle {
+      box-shadow: 0 2px 8px rgba(0,0,0,.4);
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" id="themeToggle">🌙 Dark</button>
+
+<div class="container">
+
+  <header>
+    <div class="eyebrow">Personal Finance</div>
+    <h1>Budget Tracker</h1>
+    <p>Track income and expenses — saved automatically</p>
+  </header>
+
+  <!-- BALANCE CARDS -->
+  <div class="balance-grid">
+    <div class="bal-card total">
+      <div class="bal-label">Balance</div>
+      <div class="bal-val" id="balTotal">₹ 0.00</div>
+      <div class="bal-sub" id="balSub">No entries yet</div>
+    </div>
+    <div class="bal-card income">
+      <div class="bal-label">Total Income</div>
+      <div class="bal-val" id="balIncome">₹ 0.00</div>
+      <div class="bal-sub" id="incomeCount">0 entries</div>
+    </div>
+    <div class="bal-card expense">
+      <div class="bal-label">Total Expenses</div>
+      <div class="bal-val" id="balExpense">₹ 0.00</div>
+      <div class="bal-sub" id="expenseCount">0 entries</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+
+    <!-- FORM -->
+    <div class="form-card">
+      <h2>Add Entry</h2>
+
+      <div class="toggle-wrap">
+        <button class="toggle-btn income active" id="toggleIncome">＋ Income</button>
+        <button class="toggle-btn expense"       id="toggleExpense">− Expense</button>
+      </div>
+
+      <div class="field">
+        <label for="entryName">Description</label>
+        <input type="text" id="entryName" placeholder="e.g. Salary, Groceries…" maxlength="40"/>
+        <div class="field-error" id="nameError">Please enter a description.</div>
+      </div>
+
+      <div class="field">
+        <label for="entryAmount">Amount (₹)</label>
+        <input type="number" id="entryAmount" placeholder="0.00" min="0.01" step="0.01"/>
+        <div class="field-error" id="amountError">Please enter a valid amount.</div>
+      </div>
+
+      <button class="btn-add" id="addBtn">Add Entry</button>
+    </div>
+
+    <!-- LIST -->
+    <div>
+      <div class="list-card">
+        <div class="list-header">
+          <h2>Transactions</h2>
+          <button class="clear-btn" id="clearBtn">Clear all</button>
+        </div>
+        <div class="entries-list" id="entriesList">
+          <div class="empty-state">
+            <div class="empty-icon">💰</div>
+            <p>No transactions yet.<br>Add your first entry!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHART -->
+      <div class="chart-card" id="chartCard" style="display:none">
+        <h2>Overview</h2>
+        <div class="chart-bar-wrap">
+          <div class="chart-row">
+            <div class="chart-lbl">Income</div>
+            <div class="chart-track"><div class="chart-fill income" id="chartIncome" style="width:0%"></div></div>
+            <div class="chart-num income" id="chartIncomeNum">₹ 0</div>
+          </div>
+          <div class="chart-row">
+            <div class="chart-lbl">Expenses</div>
+            <div class="chart-track"><div class="chart-fill expense" id="chartExpense" style="width:0%"></div></div>
+            <div class="chart-num expense" id="chartExpenseNum">₹ 0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── State ──
+  let entries = JSON.parse(localStorage.getItem('budget_entries') || '[]');
+  let entryType = 'income';
+
+  // ── Save ──
+  function save() {
+    localStorage.setItem('budget_entries', JSON.stringify(entries));
+  }
+
+  // ── Format currency ──
+  function fmt(n) {
+    return '₹ ' + Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  // ── Format date ──
+  function fmtDate(ts) {
+    return new Date(ts).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  // ── Update summary ──
+  function updateSummary() {
+    const income  = entries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+    const expense = entries.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+    const balance = income - expense;
+
+    document.getElementById('balTotal').textContent   = fmt(balance);
+    document.getElementById('balIncome').textContent  = fmt(income);
+    document.getElementById('balExpense').textContent = fmt(expense);
+
+    const iCount = entries.filter(e => e.type === 'income').length;
+    const eCount = entries.filter(e => e.type === 'expense').length;
+    document.getElementById('incomeCount').textContent  = iCount + (iCount === 1 ? ' entry' : ' entries');
+    document.getElementById('expenseCount').textContent = eCount + (eCount === 1 ? ' entry' : ' entries');
+
+    const balEl = document.getElementById('balTotal');
+    balEl.style.color = balance < 0 ? 'var(--red)' : balance > 0 ? 'var(--green)' : 'var(--ink)';
+
+    document.getElementById('balSub').textContent = entries.length === 0
+      ? 'No entries yet'
+      : entries.length + ' transaction' + (entries.length === 1 ? '' : 's');
+
+    // Chart
+    const chartCard = document.getElementById('chartCard');
+    if (entries.length > 0) {
+      chartCard.style.display = 'block';
+      const max = Math.max(income, expense, 1);
+      document.getElementById('chartIncome').style.width  = (income  / max * 100) + '%';
+      document.getElementById('chartExpense').style.width = (expense / max * 100) + '%';
+      document.getElementById('chartIncomeNum').textContent  = fmt(income);
+      document.getElementById('chartExpenseNum').textContent = fmt(expense);
+    } else {
+      chartCard.style.display = 'none';
+    }
+  }
+
+  // ── Render list ──
+  function renderList() {
+    const list = document.getElementById('entriesList');
+    if (entries.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-icon">💰</div><p>No transactions yet.<br>Add your first entry!</p></div>`;
+      return;
+    }
+
+    const sorted = [...entries].reverse();
+    list.innerHTML = sorted.map(e => `
+      <div class="entry-item">
+        <div class="entry-icon ${e.type}">${e.type === 'income' ? '↑' : '↓'}</div>
+        <div class="entry-info">
+          <div class="entry-name">${e.name}</div>
+          <div class="entry-date">${fmtDate(e.ts)}</div>
+        </div>
+        <div class="entry-amount ${e.type}">${e.type === 'income' ? '+' : '-'}${fmt(e.amount)}</div>
+        <button class="entry-del" data-id="${e.id}" title="Delete">✕</button>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('.entry-del').forEach(btn => {
+      btn.addEventListener('click', () => deleteEntry(btn.dataset.id));
+    });
+  }
+
+  // ── Delete ──
+  function deleteEntry(id) {
+    entries = entries.filter(e => e.id !== id);
+    save();
+    renderList();
+    updateSummary();
+  }
+
+  // ── Clear all ──
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    if (entries.length === 0) return;
+    if (confirm('Delete all transactions? This cannot be undone.')) {
+      entries = [];
+      save();
+      renderList();
+      updateSummary();
+    }
+  });
+
+  // ── Toggle type ──
+  document.getElementById('toggleIncome').addEventListener('click', () => {
+    entryType = 'income';
+    document.getElementById('toggleIncome').classList.add('active');
+    document.getElementById('toggleExpense').classList.remove('active');
+  });
+  document.getElementById('toggleExpense').addEventListener('click', () => {
+    entryType = 'expense';
+    document.getElementById('toggleExpense').classList.add('active');
+    document.getElementById('toggleIncome').classList.remove('active');
+  });
+
+  // ── Add entry ──
+  document.getElementById('addBtn').addEventListener('click', () => {
+    const nameEl   = document.getElementById('entryName');
+    const amountEl = document.getElementById('entryAmount');
+    const nameErr  = document.getElementById('nameError');
+    const amtErr   = document.getElementById('amountError');
+
+    let valid = true;
+    nameErr.style.display = 'none';
+    amtErr.style.display  = 'none';
+
+    const name   = nameEl.value.trim();
+    const amount = parseFloat(amountEl.value);
+
+    if (!name) { nameErr.style.display = 'block'; valid = false; }
+    if (!amountEl.value || isNaN(amount) || amount <= 0) { amtErr.style.display = 'block'; valid = false; }
+    if (!valid) return;
+
+    entries.push({
+      id:     crypto.randomUUID(),
+      name,
+      amount,
+      type:   entryType,
+      ts:     Date.now()
+    });
+
+    save();
+    renderList();
+    updateSummary();
+
+    nameEl.value   = '';
+    amountEl.value = '';
+    nameEl.focus();
+  });
+
+  // Enter key support
+  [document.getElementById('entryName'), document.getElementById('entryAmount')].forEach(el => {
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('addBtn').click(); });
+  });
+
+  // ── Init ──
+  renderList();
+  updateSummary();
+
+
+  // ── Theme toggle ──
+  (function() {
+    var saved = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+    function updateBtn() {
+      var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      var btn  = document.getElementById('themeToggle');
+      if (btn) btn.innerHTML = dark ? '&#9728;&#65039; Light' : '&#127769; Dark';
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      updateBtn();
+      var btn = document.getElementById('themeToggle');
+      if (btn) btn.addEventListener('click', function() {
+        var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        updateBtn();
+      });
+    });
+  })();
+
+</script>
+</body>
+</html>

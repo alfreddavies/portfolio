@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portfolio – Bridge Course</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --card:     #1c2333;
+      --border:   #30363d;
+      --text:     #e6edf3;
+      --muted:    #7d8590;
+      --accent:   #58a6ff;
+      --accent2:  #bc8cff;
+      --green:    #3fb950;
+      --orange:   #f78166;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(13,17,23,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 58px;
+    }
+    .nav-logo {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -.02em;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-links {
+      display: flex;
+      gap: 1.8rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .85rem;
+      font-weight: 500;
+      transition: color .18s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 7rem 1.5rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated grid background */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(48,54,61,.35) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(48,54,61,.35) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
+      pointer-events: none;
+    }
+    /* Glow orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .18;
+      pointer-events: none;
+    }
+    .orb-1 { width: 500px; height: 500px; background: var(--accent);  top: -100px; left: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: var(--accent2); bottom: 0;   right: -80px; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      background: rgba(88,166,255,.1);
+      border: 1px solid rgba(88,166,255,.25);
+      border-radius: 99px;
+      padding: .3rem .9rem;
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 1.4rem;
+      position: relative;
+    }
+    .badge-dot {
+      width: 7px; height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: .5; transform: scale(.8); }
+    }
+
+    .hero h1 {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: clamp(2.8rem, 9vw, 6rem);
+      font-weight: 800;
+      letter-spacing: -.04em;
+      line-height: 1.05;
+      margin-bottom: .5rem;
+      position: relative;
+    }
+    .hero h1 .name-accent {
+      background: linear-gradient(120deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero .tagline {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.65;
+      margin-bottom: 2.5rem;
+      position: relative;
+    }
+    .hero .tagline strong { color: var(--text); font-weight: 600; }
+
+    .hero-ctas {
+      display: flex;
+      gap: .8rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 10px;
+      padding: .75rem 1.6rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: .95rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity .18s, transform .12s;
+      display: inline-block;
+    }
+    .btn-primary:hover { opacity: .88; transform: translateY(-2px); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: .75rem 1.6rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: .95rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color .18s, transform .12s;
+      display: inline-block;
+    }
+    .btn-ghost:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+    /* Scroll hint */
+    .scroll-hint {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .4rem;
+      color: var(--muted);
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .scroll-arrow {
+      width: 18px; height: 18px;
+      border-right: 2px solid var(--muted);
+      border-bottom: 2px solid var(--muted);
+      transform: rotate(45deg);
+      animation: bounce 1.6s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%,100% { transform: rotate(45deg) translateY(0); }
+      50%      { transform: rotate(45deg) translateY(5px); }
+    }
+
+    /* ── SECTIONS ── */
+    section { padding: 5rem 1.5rem; }
+    .section-inner { max-width: 1000px; margin: 0 auto; }
+
+    .section-eyebrow {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .6rem;
+    }
+    .section-title {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .section-sub {
+      color: var(--muted);
+      font-size: .95rem;
+      line-height: 1.65;
+      max-width: 500px;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── SKILLS ── */
+    #skills { background: var(--surface); }
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .skill-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 1.4rem 1.5rem;
+      transition: border-color .2s, transform .2s;
+    }
+    .skill-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+    .skill-icon { font-size: 1.8rem; margin-bottom: .7rem; }
+    .skill-name {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: .3rem;
+    }
+    .skill-desc { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+
+    /* Skill bar */
+    .skill-bar-track {
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      margin-top: .8rem;
+      overflow: hidden;
+    }
+    .skill-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    /* ── PROJECTS ── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.2rem;
+    }
+    .project-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .project-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(88,166,255,.1);
+    }
+    .project-preview {
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .project-preview::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 40%, var(--card) 100%);
+    }
+    .project-body { padding: 1.2rem 1.3rem 1.4rem; flex: 1; display: flex; flex-direction: column; }
+    .project-tags { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: .7rem; }
+    .project-tag {
+      font-size: .65rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: rgba(88,166,255,.1);
+      color: var(--accent);
+      border-radius: 5px;
+      padding: .15rem .5rem;
+    }
+    .project-name {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: .4rem;
+      letter-spacing: -.01em;
+    }
+    .project-desc {
+      font-size: .82rem;
+      color: var(--muted);
+      line-height: 1.55;
+      flex: 1;
+      margin-bottom: 1rem;
+    }
+    .project-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: .82rem;
+      font-weight: 600;
+      transition: gap .18s;
+    }
+    .project-link:hover { gap: .6rem; }
+    .project-link svg {
+      width: 13px; height: 13px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+
+    /* ── ABOUT ── */
+    #about { background: var(--surface); }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+    .about-text p {
+      color: var(--muted);
+      font-size: .95rem;
+      line-height: 1.75;
+      margin-bottom: 1rem;
+    }
+    .about-text p strong { color: var(--text); }
+    .about-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .8rem;
+    }
+    .about-stat {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 1.1rem 1.2rem;
+      text-align: center;
+    }
+    .about-stat .as-val {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(120deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .about-stat .as-lbl { font-size: .75rem; color: var(--muted); margin-top: .2rem; }
+
+    /* ── CONTACT ── */
+    .contact-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 3rem 2.5rem;
+      text-align: center;
+      max-width: 580px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+    .contact-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%;
+      transform: translateX(-50%);
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(88,166,255,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .contact-card h3 {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      margin-bottom: .5rem;
+    }
+    .contact-card p {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    .contact-links {
+      display: flex;
+      flex-direction: column;
+      gap: .7rem;
+      align-items: center;
+    }
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .65rem;
+      color: var(--text);
+      text-decoration: none;
+      font-size: .92rem;
+      font-weight: 500;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: .7rem 1.4rem;
+      width: 100%;
+      max-width: 300px;
+      transition: border-color .18s, transform .12s;
+    }
+    .contact-link:hover { border-color: var(--accent); transform: translateX(4px); }
+    .contact-link .link-icon { font-size: 1.1rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .78rem;
+    }
+    footer strong { color: var(--accent); }
+
+    /* ── REVEAL ANIMATION ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 640px) {
+      nav .nav-links { display: none; }
+      .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .contact-card { padding: 2rem 1.4rem; }
+      section { padding: 4rem 1.2rem; }
+    }
+
+    /* ── THEME TOGGLE BUTTON ── */
+    .theme-toggle {
+      position: fixed;
+      top: 14px;
+      right: 16px;
+      z-index: 999;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      padding: .38rem .85rem;
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      transition: background .2s, border-color .2s, color .2s;
+      font-family: inherit;
+    }
+    .theme-toggle:hover { border-color: var(--accent); }
+
+    /* ── DARK THEME OVERRIDES ── */
+    [data-theme="dark"] {
+      --bg:        #0f172a;
+      --surface:   #1e293b;
+      --card:      #1e293b;
+      --border:    #334155;
+      --ink:       #f1f5f9;
+      --muted:     #64748b;
+      --green-bg:  #14532d;
+      --red-bg:    #450a0a;
+      --yellow-bg: #451a03;
+      --blue-bg:   #1e3a5f;
+    }
+    [data-theme="dark"] .theme-toggle {
+      box-shadow: 0 2px 8px rgba(0,0,0,.4);
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" id="themeToggle">🌙 Dark</button>
+
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#hero">dev<span>.</span>portfolio</a>
+  <ul class="nav-links">
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    Open to opportunities
+  </div>
+
+  <h1>
+    Hi, I'm<br/>
+    <span class="name-accent">Student Developer</span>
+  </h1>
+
+  <p class="tagline">
+    A <strong>Bridge Course</strong> student building real-world web apps with
+    <strong>HTML, CSS, JavaScript</strong> and modern <strong>AI tools</strong>.
+  </p>
+
+  <div class="hero-ctas">
+    <a href="#projects" class="btn-primary">View My Projects</a>
+    <a href="#contact" class="btn-ghost">Get in Touch</a>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-eyebrow">What I know</div>
+      <h2 class="section-title">Skills & Tools</h2>
+      <p class="section-sub">Technologies I've learned and applied through the Bridge Course curriculum.</p>
+    </div>
+    <div class="skills-grid reveal">
+      <div class="skill-card">
+        <div class="skill-icon">🌐</div>
+        <div class="skill-name">HTML5</div>
+        <div class="skill-desc">Semantic markup, accessibility, and structured document creation.</div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" style="width:90%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🎨</div>
+        <div class="skill-name">CSS3</div>
+        <div class="skill-desc">Responsive layouts, Flexbox, Grid, animations, and dark-mode design.</div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" style="width:82%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">⚡</div>
+        <div class="skill-name">JavaScript</div>
+        <div class="skill-desc">DOM manipulation, async/await, fetch API, LocalStorage, and event handling.</div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" style="width:78%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🔗</div>
+        <div class="skill-name">REST APIs</div>
+        <div class="skill-desc">Integrating public APIs — weather, quiz, countries, jokes, and more.</div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" style="width:80%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🐙</div>
+        <div class="skill-name">Git & GitHub</div>
+        <div class="skill-desc">Version control, branching, committing, and managing repositories.</div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" style="width:72%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🤖</div>
+        <div class="skill-name">AI Tools</div>
+        <div class="skill-desc">Prompt engineering with Claude, ChatGPT, Bolt.new, and Lovable.</div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" style="width:88%"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-eyebrow">What I built</div>
+      <h2 class="section-title">Projects</h2>
+      <p class="section-sub">Five fully functional web apps built from scratch during the Bridge Course — each a single HTML file, no frameworks.</p>
+    </div>
+    <div class="projects-grid reveal">
+
+      <!-- Weather -->
+      <div class="project-card">
+        <div class="project-preview" style="background: linear-gradient(135deg,#0b0f1a,#1a2a45);">⛅</div>
+        <div class="project-body">
+          <div class="project-tags">
+            <span class="project-tag">API</span>
+            <span class="project-tag">JavaScript</span>
+          </div>
+          <div class="project-name">Weather Dashboard</div>
+          <div class="project-desc">Live weather for any city using Open-Meteo. Shows temperature, humidity, wind, precipitation and more with WMO weather codes.</div>
+          <a class="project-link" href="weather-dashboard.html" target="_blank">
+            Open project
+            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quiz -->
+      <div class="project-card">
+        <div class="project-preview" style="background: linear-gradient(135deg,#0e0e14,#1c1c28);">🧠</div>
+        <div class="project-body">
+          <div class="project-tags">
+            <span class="project-tag">API</span>
+            <span class="project-tag">UI/UX</span>
+          </div>
+          <div class="project-name">Random Quiz App</div>
+          <div class="project-desc">Interactive 5-question quiz with category selection, difficulty badges, score tracking, and a final results screen.</div>
+          <a class="project-link" href="quiz-app.html" target="_blank">
+            Open project
+            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Joke -->
+      <div class="project-card">
+        <div class="project-preview" style="background: linear-gradient(135deg,#fafaf7,#f0ede6);">😄</div>
+        <div class="project-body">
+          <div class="project-tags">
+            <span class="project-tag">API</span>
+            <span class="project-tag">Animation</span>
+          </div>
+          <div class="project-name">Joke & Quote Generator</div>
+          <div class="project-desc">Fetch jokes and quotes by category with smooth fade animations. Two-part jokes reveal punchlines on demand.</div>
+          <a class="project-link" href="joke-quote-generator.html" target="_blank">
+            Open project
+            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Budget -->
+      <div class="project-card">
+        <div class="project-preview" style="background: linear-gradient(135deg,#f4f6f9,#e2e8f0);">💰</div>
+        <div class="project-body">
+          <div class="project-tags">
+            <span class="project-tag">LocalStorage</span>
+            <span class="project-tag">State</span>
+          </div>
+          <div class="project-name">Budget Tracker</div>
+          <div class="project-desc">Add income and expense entries, track your running balance, and visualise spending with a live bar chart. Data persists via LocalStorage.</div>
+          <a class="project-link" href="budget-tracker.html" target="_blank">
+            Open project
+            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Country -->
+      <div class="project-card">
+        <div class="project-preview" style="background: linear-gradient(135deg,#06080f,#111827);">🌍</div>
+        <div class="project-body">
+          <div class="project-tags">
+            <span class="project-tag">API</span>
+            <span class="project-tag">Data</span>
+          </div>
+          <div class="project-name">Country Info Explorer</div>
+          <div class="project-desc">Search any country and explore its flag, population, capital, languages, currencies, timezones, and clickable bordering nations.</div>
+          <a class="project-link" href="country-explorer.html" target="_blank">
+            Open project
+            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <div class="section-eyebrow">Who I am</div>
+        <h2 class="section-title">About Me</h2>
+        <p>I'm a student enrolled in the <strong>Bridge Course</strong> — an intensive programme covering front-end development, Git, and AI-assisted coding. I'm based in <strong>Thrissur, Kerala</strong>.</p>
+        <p>Over the course of this programme I've gone from writing my first HTML tag to building five complete, API-connected web applications — entirely with <strong>vanilla HTML, CSS, and JavaScript</strong>, no frameworks.</p>
+        <p>I'm passionate about combining <strong>clean design</strong> with real functionality, and I enjoy using AI tools to accelerate development without sacrificing quality.</p>
+      </div>
+      <div class="about-stats reveal">
+        <div class="about-stat">
+          <div class="as-val">5</div>
+          <div class="as-lbl">Projects Built</div>
+        </div>
+        <div class="about-stat">
+          <div class="as-val">6</div>
+          <div class="as-lbl">APIs Integrated</div>
+        </div>
+        <div class="about-stat">
+          <div class="as-val">0</div>
+          <div class="as-lbl">Frameworks Used</div>
+        </div>
+        <div class="about-stat">
+          <div class="as-val">∞</div>
+          <div class="as-lbl">Things to Learn</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-eyebrow">Say hello</div>
+      <h2 class="section-title" style="text-align:center">Get in Touch</h2>
+    </div>
+    <div class="contact-card reveal">
+      <h3>Let's connect 👋</h3>
+      <p>I'm always open to feedback, collaboration, or just a friendly chat about web development and AI.</p>
+      <div class="contact-links">
+        <a href="mailto:student@example.com" class="contact-link">
+          <span class="link-icon">✉️</span>
+          student@example.com
+        </a>
+        <a href="https://github.com" target="_blank" class="contact-link">
+          <span class="link-icon">🐙</span>
+          github.com/student
+        </a>
+        <a href="https://linkedin.com" target="_blank" class="contact-link">
+          <span class="link-icon">💼</span>
+          linkedin.com/in/student
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  Built with ❤️ using <strong>HTML · CSS · JavaScript</strong> — Bridge Course Project © 2026
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+
+  // ── Theme toggle ──
+  (function() {
+    var saved = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+    function updateBtn() {
+      var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      var btn  = document.getElementById('themeToggle');
+      if (btn) btn.innerHTML = dark ? '&#9728;&#65039; Light' : '&#127769; Dark';
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      updateBtn();
+      var btn = document.getElementById('themeToggle');
+      if (btn) btn.addEventListener('click', function() {
+        var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        updateBtn();
+      });
+    });
+  })();
+
+</script>
+</body>
+</html>
