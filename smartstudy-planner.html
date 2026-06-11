@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartStudy Planner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --surface:   #181c27;
+      --card:      #1e2335;
+      --border:    #2a3050;
+      --accent:    #6c8bff;
+      --accent2:   #a78bfa;
+      --green:     #34d399;
+      --yellow:    #fbbf24;
+      --red:       #f87171;
+      --text:      #e8eaf6;
+      --muted:     #7b82a0;
+      --radius:    12px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .logo span { color: var(--accent); }
+    .header-date {
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: var(--card);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    /* ── LAYOUT ── */
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 32px;
+      width: fit-content;
+    }
+    .tab-btn {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    /* ── FORM GRID ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media(max-width:600px){ .form-grid { grid-template-columns: 1fr; } }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    input, textarea, select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 80px; }
+
+    .form-span-2 { grid-column: span 2; }
+    @media(max-width:600px){ .form-span-2 { grid-column: span 1; } }
+
+    /* ── BUTTONS ── */
+    .btn {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 10px 22px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red); font-size: 0.78rem; padding: 5px 12px; }
+    .btn-danger:hover { background: var(--red); color: #fff; }
+    .btn-green { background: var(--green); color: #0f1117; }
+
+    /* ── SUBJECT CARDS ── */
+    .subject-list { display: flex; flex-direction: column; gap: 14px; }
+    .subject-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .subject-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .subject-info { flex: 1; }
+    .subject-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    .subject-meta { font-size: 0.78rem; color: var(--muted); }
+    .subject-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap {
+      background: var(--bg);
+      border-radius: 4px;
+      height: 6px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--accent);
+      transition: width 0.4s ease;
+    }
+    .progress-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── SCHEDULE TABLE ── */
+    .schedule-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .day-block {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    .day-header {
+      background: var(--surface);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .day-label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .day-date {
+      font-size: 0.78rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .topic-row {
+      display: flex;
+      align-items: center;
+      padding: 12px 18px;
+      gap: 14px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .topic-row:last-child { border-bottom: none; }
+    .topic-row:hover { background: rgba(108,139,255,0.04); }
+    .topic-check {
+      width: 18px; height: 18px;
+      border-radius: 5px;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      flex-shrink: 0;
+      appearance: none;
+      background: var(--bg);
+      transition: all 0.15s;
+      position: relative;
+    }
+    .topic-check:checked {
+      background: var(--green);
+      border-color: var(--green);
+    }
+    .topic-check:checked::after {
+      content: '✓';
+      position: absolute;
+      top: -1px; left: 2px;
+      font-size: 12px;
+      color: #0f1117;
+      font-weight: 700;
+    }
+    .topic-text { flex: 1; font-size: 0.875rem; }
+    .topic-text.done { text-decoration: line-through; color: var(--muted); }
+    .subject-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    /* ── OVERVIEW STATS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+    .stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-label { font-size: 0.75rem; color: var(--muted); }
+
+    /* ── EMPTY STATE ── */
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .empty-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+    .empty-sub { font-size: 0.85rem; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: var(--green);
+      color: #0f1117;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 12px 20px;
+      border-radius: 8px;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 999;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── CHIPS ── */
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .chip:hover { border-color: var(--red); color: var(--red); }
+    .chip-remove { font-size: 0.7rem; color: var(--muted); }
+
+    .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .mt-16 { margin-top: 16px; }
+    .text-accent { color: var(--accent); }
+    .text-green { color: var(--green); }
+    .text-yellow { color: var(--yellow); }
+    .text-red { color: var(--red); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Smart<span>Study</span></div>
+  <div class="header-date" id="headerDate"></div>
+</header>
+
+<div class="app">
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('subjects')">📚 Subjects</button>
+    <button class="tab-btn" onclick="switchTab('schedule')">📅 Schedule</button>
+    <button class="tab-btn" onclick="switchTab('progress')">📊 Progress</button>
+  </div>
+
+  <!-- ══ TAB 1: SUBJECTS ══ -->
+  <div class="tab-panel active" id="tab-subjects">
+
+    <!-- Add Subject Form -->
+    <div class="card">
+      <div class="section-title">Add a Subject</div>
+      <div class="form-grid">
+        <div>
+          <label>Subject Name</label>
+          <input type="text" id="subjectName" placeholder="e.g. Robotics, DBMS"/>
+        </div>
+        <div>
+          <label>Exam Date</label>
+          <input type="date" id="examDate"/>
+        </div>
+        <div class="form-span-2">
+          <label>Add Topics / Modules (press Enter or comma to add)</label>
+          <input type="text" id="topicInput" placeholder="e.g. Forward Kinematics" onkeydown="handleTopicKey(event)"/>
+          <div class="chips" id="topicChips"></div>
+        </div>
+      </div>
+      <div class="mt-16 row">
+        <button class="btn btn-primary" onclick="addSubject()">Add Subject</button>
+        <span style="font-size:0.78rem;color:var(--muted)">Topics will be spread across your study days automatically.</span>
+      </div>
+    </div>
+
+    <!-- Subject List -->
+    <div class="section-title">Your Subjects</div>
+    <div class="subject-list" id="subjectList">
+      <div class="empty" id="emptySubjects">
+        <div class="empty-icon">📖</div>
+        <div class="empty-title">No subjects yet</div>
+        <div class="empty-sub">Add your first subject above to get started.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ TAB 2: SCHEDULE ══ -->
+  <div class="tab-panel" id="tab-schedule">
+    <div class="schedule-header">
+      <div class="section-title" style="margin:0">Study Schedule</div>
+      <button class="btn btn-primary" onclick="generateSchedule()">⚡ Generate Schedule</button>
+    </div>
+    <div id="scheduleContainer">
+      <div class="empty" id="emptySchedule">
+        <div class="empty-icon">📅</div>
+        <div class="empty-title">Schedule not generated yet</div>
+        <div class="empty-sub">Add your subjects, then click "Generate Schedule".</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 3: PROGRESS ══ -->
+  <div class="tab-panel" id="tab-progress">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="section-title">Subject Progress</div>
+    <div id="progressList">
+      <div class="empty" id="emptyProgress">
+        <div class="empty-icon">📊</div>
+        <div class="empty-title">No data yet</div>
+        <div class="empty-sub">Add subjects and generate a schedule to track progress.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast">✓ Done!</div>
+
+<script>
+  // ── STATE ──
+  let state = JSON.parse(localStorage.getItem('smartstudy') || 'null') || {
+    subjects: [],   // { id, name, examDate, topics: [], color }
+    schedule: [],   // { date, tasks: [{subjectId, topic, done}] }
+    generated: false
+  };
+
+  const COLORS = ['#6c8bff','#a78bfa','#34d399','#fbbf24','#f87171','#38bdf8','#fb923c','#e879f9'];
+  let tempTopics = [];
+
+  function save() { localStorage.setItem('smartstudy', JSON.stringify(state)); }
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // ── DATE ──
+  function formatDate(d) {
+    return new Date(d).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+  }
+  function daysUntil(dateStr) {
+    const diff = new Date(dateStr) - new Date();
+    return Math.ceil(diff / 86400000);
+  }
+  document.getElementById('headerDate').textContent =
+    new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long' });
+
+  // ── TABS ──
+  function switchTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+    if (name === 'progress') renderProgress();
+    if (name === 'schedule') renderSchedule();
+  }
+
+  // ── TOPICS CHIP INPUT ──
+  function handleTopicKey(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = e.target.value.replace(',','').trim();
+      if (val) { addTopicChip(val); e.target.value = ''; }
+    }
+  }
+  function addTopicChip(text) {
+    if (tempTopics.includes(text)) return;
+    tempTopics.push(text);
+    renderChips();
+  }
+  function removeTopicChip(text) {
+    tempTopics = tempTopics.filter(t => t !== text);
+    renderChips();
+  }
+  function renderChips() {
+    const c = document.getElementById('topicChips');
+    c.innerHTML = tempTopics.map(t =>
+      `<div class="chip" onclick="removeTopicChip('${t.replace(/'/g,"\\'")}')">
+        ${t} <span class="chip-remove">✕</span>
+      </div>`
+    ).join('');
+  }
+
+  // ── ADD SUBJECT ──
+  function addSubject() {
+    const name = document.getElementById('subjectName').value.trim();
+    const examDate = document.getElementById('examDate').value;
+    if (!name) { alert('Enter a subject name.'); return; }
+    if (!examDate) { alert('Pick an exam date.'); return; }
+    if (tempTopics.length === 0) { alert('Add at least one topic.'); return; }
+
+    const subject = {
+      id: Date.now().toString(),
+      name, examDate,
+      topics: [...tempTopics],
+      color: COLORS[state.subjects.length % COLORS.length]
+    };
+    state.subjects.push(subject);
+    state.generated = false;
+    save();
+
+    // Reset form
+    document.getElementById('subjectName').value = '';
+    document.getElementById('examDate').value = '';
+    document.getElementById('topicInput').value = '';
+    tempTopics = [];
+    renderChips();
+    renderSubjects();
+    toast('Subject added!');
+  }
+
+  // ── RENDER SUBJECTS ──
+  function renderSubjects() {
+    const list = document.getElementById('subjectList');
+    document.getElementById('emptySubjects').style.display = state.subjects.length ? 'none' : 'block';
+    const cards = state.subjects.map(s => {
+      const d = daysUntil(s.examDate);
+      const urgency = d <= 2 ? 'text-red' : d <= 5 ? 'text-yellow' : 'text-green';
+      const doneCount = countDoneTopics(s.id);
+      const pct = s.topics.length ? Math.round(doneCount / s.topics.length * 100) : 0;
+      return `
+        <div class="subject-card">
+          <div class="subject-dot" style="background:${s.color}"></div>
+          <div class="subject-info">
+            <div class="subject-name">${s.name}</div>
+            <div class="subject-meta">Exam: ${formatDate(s.examDate)} &nbsp;·&nbsp; ${s.topics.length} topics</div>
+            <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:${s.color}"></div></div>
+            <div class="progress-label">${pct}% complete</div>
+          </div>
+          <div style="text-align:right">
+            <div class="subject-badge ${urgency}">${d > 0 ? d + ' days' : 'Today!'}</div>
+            <br>
+            <button class="btn btn-danger" style="margin-top:8px" onclick="removeSubject('${s.id}')">Remove</button>
+          </div>
+        </div>`;
+    }).join('');
+    list.innerHTML = (state.subjects.length ? '' : '') + cards +
+      `<div class="empty" id="emptySubjects" style="display:${state.subjects.length ? 'none' : 'block'}">
+        <div class="empty-icon">📖</div>
+        <div class="empty-title">No subjects yet</div>
+        <div class="empty-sub">Add your first subject above to get started.</div>
+      </div>`;
+  }
+
+  function removeSubject(id) {
+    if (!confirm('Remove this subject?')) return;
+    state.subjects = state.subjects.filter(s => s.id !== id);
+    state.schedule = state.schedule.map(day => ({
+      ...day, tasks: day.tasks.filter(t => t.subjectId !== id)
+    })).filter(day => day.tasks.length > 0);
+    save(); renderSubjects(); toast('Subject removed.');
+  }
+
+  function countDoneTopics(subjectId) {
+    let count = 0;
+    state.schedule.forEach(day => {
+      day.tasks.forEach(t => { if (t.subjectId === subjectId && t.done) count++; });
+    });
+    return count;
+  }
+
+  // ── GENERATE SCHEDULE ──
+  function generateSchedule() {
+    if (!state.subjects.length) { alert('Add at least one subject first.'); return; }
+
+    const today = new Date(); today.setHours(0,0,0,0);
+    // Build topic pool: [{subjectId, topic, examDate}]
+    let pool = [];
+    state.subjects.forEach(s => {
+      s.topics.forEach(topic => pool.push({ subjectId: s.id, topic, examDate: s.examDate }));
+    });
+
+    // Sort by exam date (earliest first)
+    pool.sort((a, b) => new Date(a.examDate) - new Date(b.examDate));
+
+    // Find range: today → last exam
+    const lastExam = new Date(Math.max(...state.subjects.map(s => new Date(s.examDate))));
+    const numDays = Math.max(1, Math.ceil((lastExam - today) / 86400000) + 1);
+
+    // Distribute: max 5 topics/day, proportional to urgency
+    let schedule = [];
+    let remaining = [...pool];
+    let d = new Date(today);
+
+    for (let i = 0; i < numDays && remaining.length > 0; i++) {
+      const dateStr = d.toISOString().split('T')[0];
+      // Filter topics whose exam hasn't passed yet
+      const available = remaining.filter(t => new Date(t.examDate) >= d);
+      if (!available.length) { d.setDate(d.getDate()+1); continue; }
+
+      const take = Math.min(5, available.length);
+      const dayTopics = available.slice(0, take);
+
+      schedule.push({
+        date: dateStr,
+        tasks: dayTopics.map(t => ({
+          subjectId: t.subjectId,
+          topic: t.topic,
+          done: false,
+          id: t.subjectId + '_' + t.topic.replace(/\s/g,'_')
+        }))
+      });
+
+      const ids = new Set(dayTopics.map(t => t.subjectId + t.topic));
+      remaining = remaining.filter(t => !ids.has(t.subjectId + t.topic));
+      d.setDate(d.getDate() + 1);
+    }
+
+    // Merge done states from old schedule
+    const oldDone = {};
+    state.schedule.forEach(day => day.tasks.forEach(t => { if (t.done) oldDone[t.id] = true; }));
+    schedule.forEach(day => day.tasks.forEach(t => { if (oldDone[t.id]) t.done = true; }));
+
+    state.schedule = schedule;
+    state.generated = true;
+    save();
+    renderSchedule();
+    toast('Schedule generated!');
+  }
+
+  // ── RENDER SCHEDULE ──
+  function renderSchedule() {
+    const container = document.getElementById('scheduleContainer');
+    document.getElementById('emptySchedule').style.display = (!state.generated || !state.schedule.length) ? 'block' : 'none';
+    if (!state.schedule.length) { container.innerHTML = document.getElementById('emptySchedule').outerHTML; return; }
+
+    const today = new Date().toISOString().split('T')[0];
+    const html = state.schedule.map((day, di) => {
+      const isToday = day.date === today;
+      const isPast = day.date < today;
+      const dayName = new Date(day.date).toLocaleDateString('en-IN', { weekday:'long' });
+      const tasks = day.tasks.map(t => {
+        const sub = state.subjects.find(s => s.id === t.subjectId);
+        if (!sub) return '';
+        return `<div class="topic-row">
+          <input type="checkbox" class="topic-check" ${t.done ? 'checked' : ''}
+            onchange="toggleTopic(${di}, '${t.id}', this.checked)"/>
+          <span class="topic-text ${t.done ? 'done' : ''}" id="txt_${t.id}">${t.topic}</span>
+          <span class="subject-tag" style="background:${sub.color}22;color:${sub.color};border:1px solid ${sub.color}44">${sub.name}</span>
+        </div>`;
+      }).join('');
+
+      const allDone = day.tasks.every(t => t.done);
+      return `<div class="day-block" style="${isToday ? 'border-color:var(--accent)' : ''}${isPast ? 'opacity:0.6' : ''}">
+        <div class="day-header">
+          <span class="day-label">${isToday ? '⚡ Today — ' : ''}${dayName}</span>
+          <span class="day-date">${formatDate(day.date)}${allDone ? ' ✓' : ''}</span>
+        </div>
+        ${tasks}
+      </div>`;
+    }).join('');
+
+    container.innerHTML = `<div id="emptySchedule" style="display:none"></div>` + html;
+  }
+
+  function toggleTopic(dayIdx, taskId, done) {
+    const task = state.schedule[dayIdx].tasks.find(t => t.id === taskId);
+    if (task) { task.done = done; save(); renderSubjects(); renderProgress(); }
+    const txt = document.getElementById('txt_' + taskId);
+    if (txt) { txt.classList.toggle('done', done); }
+  }
+
+  // ── PROGRESS ──
+  function renderProgress() {
+    const grid = document.getElementById('statsGrid');
+    const list = document.getElementById('progressList');
+    document.getElementById('emptyProgress').style.display = state.subjects.length ? 'none' : 'block';
+
+    if (!state.subjects.length) { grid.innerHTML = ''; list.innerHTML = document.getElementById('emptyProgress').outerHTML; return; }
+
+    const totalTopics = state.subjects.reduce((s, sub) => s + sub.topics.length, 0);
+    const totalDone = state.subjects.reduce((s, sub) => s + countDoneTopics(sub.id), 0);
+    const pct = totalTopics ? Math.round(totalDone / totalTopics * 100) : 0;
+    const daysLeft = state.subjects.length ? Math.min(...state.subjects.map(s => Math.max(0, daysUntil(s.examDate)))) : '-';
+
+    grid.innerHTML = `
+      <div class="stat-card"><div class="stat-value text-accent">${totalDone}/${totalTopics}</div><div class="stat-label">Topics completed</div></div>
+      <div class="stat-card"><div class="stat-value text-green">${pct}%</div><div class="stat-label">Overall progress</div></div>
+      <div class="stat-card"><div class="stat-value text-yellow">${state.subjects.length}</div><div class="stat-label">Subjects tracked</div></div>
+      <div class="stat-card"><div class="stat-value ${daysLeft <= 3 ? 'text-red' : 'text-accent'}">${daysLeft}</div><div class="stat-label">Days to next exam</div></div>
+    `;
+
+    list.innerHTML = state.subjects.map(s => {
+      const done = countDoneTopics(s.id);
+      const pct = s.topics.length ? Math.round(done / s.topics.length * 100) : 0;
+      const d = daysUntil(s.examDate);
+      const urgency = d <= 2 ? '#f87171' : d <= 5 ? '#fbbf24' : '#34d399';
+      return `<div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:10px;height:10px;border-radius:50%;background:${s.color}"></div>
+            <span style="font-family:'Space Grotesk',sans-serif;font-weight:600">${s.name}</span>
+          </div>
+          <span style="font-size:0.78rem;color:${urgency};font-weight:600">${d > 0 ? d + ' days left' : 'Exam day!'}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--muted);margin-bottom:6px">
+          <span>${done} of ${s.topics.length} topics done</span>
+          <span>${pct}%</span>
+        </div>
+        <div class="progress-wrap" style="height:8px">
+          <div class="progress-bar" style="width:${pct}%;background:${s.color}"></div>
+        </div>
+        <div class="chips" style="margin-top:12px">
+          ${s.topics.map(t => {
+            const isDone = isTopicDone(s.id, t);
+            return `<div class="chip" style="${isDone ? 'background:#34d39922;border-color:#34d39944;color:#34d399' : ''}">
+              ${isDone ? '✓ ' : ''}${t}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function isTopicDone(subjectId, topic) {
+    for (const day of state.schedule) {
+      for (const t of day.tasks) {
+        if (t.subjectId === subjectId && t.topic === topic && t.done) return true;
+      }
+    }
+    return false;
+  }
+
+  // ── INIT ──
+  renderSubjects();
+  renderSchedule();
+</script>
+
+</body>
+</html>
